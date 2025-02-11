@@ -1,0 +1,11 @@
+.idea/
+.venv/
+*.pyc
+.test_env/
+.build/
+*.csv
+.dist/
+*.ico
+.DS_Store
+
+
