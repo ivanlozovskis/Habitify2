@@ -44,7 +44,6 @@ def stats(root=None):
     app_data_dir = get_app_data_dir()
     imagepath = app_data_dir / f"calendar{globals.CURRENT_YEAR1}.png"
 
-
     image_path = year_activity_calendar(globals.CURRENT_YEAR1, output_file=imagepath)
 
 
@@ -99,8 +98,8 @@ def stats(root=None):
         flag = monthly_activity_in_minutes(data, get_app_data_dir())
         image_path1 = all_habits_grid_plot(data, month=globals.CURRENT_MONTH, cur_month=globals.CONT_MONTH,
                                            year=globals.CURRENT_YEAR1, output_dir=imagepath1)
-
-        labelim1 = None
+        labelim1_state = False
+        labelim1 = tk.Label()
         if flag:
             imgm = Image.open(
                 f"{app_data_dir}/activity_month_{int(globals.CURRENT_YEAR1)}-{int(globals.CURRENT_MONTH):02d}_combined.png")
@@ -111,6 +110,7 @@ def stats(root=None):
 
             tk_imagem = ImageTk.PhotoImage(imgm)
             labelim1 = tk.Label(top_frame, image=tk_imagem, bg='lightgrey')
+            labelim1_state = True
             labelim1.image = tk_imagem
 
         img1 = Image.open(image_path1)
@@ -153,7 +153,7 @@ def stats(root=None):
         globals.MBTN_RIGHT.pack(side="left", padx=5)
 
         labelim.pack()
-        if labelim1 != None:
+        if labelim1_state :
             labelim1.pack()
 
         middle_frame = tk.Frame(scrollable_frame, bg="lightgrey", height=150)
@@ -305,7 +305,7 @@ def stats(root=None):
 
 
     except Exception as e:
-        # print(e)
+        print(e)
         no_data_label = tk.Label(top_frame, text="No Data", bg='lightgrey', fg='black')
         no_data_label.pack(side="right", padx=5)
 

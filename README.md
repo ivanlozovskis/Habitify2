@@ -8,15 +8,10 @@
 - **Progress Analysis:** View habit statistics and streaks.
 - **Data Persistence:** Stores habit data in a **local MySQL database**.
 - **GUI Interface:** User-friendly graphical interface for easy navigation.
-- **Standalone Executable:** Run the app without needing Python or dependencies.
 
-1.
 
-   ```bash
-   python main.py
-   ```
 
-## Installation
+## Installation (Mac)
 
 #### Prerequisites
 #### Ensure you have the following installed:
@@ -28,8 +23,8 @@
 1. Clone the Repository:
 
 ```bash
-git clone https://github.com/ivanlozovskis/Habitify.git
-cd habitify
+git clone https://github.com/ivanlozovskis/Habitify2.git
+cd habitify2
 ```
 2. Install Dependencies:
 
@@ -37,14 +32,28 @@ cd habitify
 pip install -r requirements.txt
 ```
 3. Set Up MySQL Database:
+ 
 
-- Ensure MySQL is running.
-- Create a new database:
+- Ensure MySQL server is running.
+- DB will be created automatically
+- **in the config.json change the "password" to the password to your mysql server**
+
+4. Run testing:
+
 ```bash
-CREATE DATABASE Habitify;
-```
-- Configure database settings in database.py.
-4. Run the Application:
+   python test.py
+   ```
+**After testing you can switch "freeze" in config.json from 1 to 0 to exit the testing mode (the today's date is set to "2025-01-27 20:05:03")**
+
+If you want to reset the app data you can run:
+```bash
+   python reset.py
+   ```
+
+
+
+
+5. Run the Application:
 
 
 
@@ -57,10 +66,15 @@ CREATE DATABASE Habitify;
 ## Usage
 
 1. **Launch the application**
-2. **Add new habits** by entering a name and selecting a frequency.
-3. **Track progress** by marking habits as completed.
-4. **View statistics** in the analysis window.
-5. **Modify or delete habits** as needed.
+2. **Add new habits** by entering a name, description and selecting a frequency & clock usage.
+3. **Track progress** by marking habits as completed ("Done" Checkbox, after starting the clock if the habit is "Stopwatch" type).
+Weekly habits streaks are in weeks and Daily habits streaks are in days. "🔥" stands for days/weeks in a row. "⏳" stands for a habit at risk of being lost (ends tomorrow/next week). "😴" stands for amount of days/weeks in a row without checking the habit.
+4. **Fill missed data if missed any in the previous day**.
+5. **View statistics** in the stats window.
+6. **delete habits** as needed.
+
+
+
 
 
 ## Contributing

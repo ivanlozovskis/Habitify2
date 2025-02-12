@@ -1,10 +1,23 @@
 from datetime import datetime
+import json
+from datetime import datetime
+
+with open("config.json", "r") as file:
+    config = json.load(file)['database']
 
 
-CURRENT_MONTH = datetime.now().month
-CURRENT_YEAR = datetime.now().year ###CRYR
-CURRENT_YEAR1 = datetime.now().year ###CURRENT_YEAR
-YEAR_MONTH = datetime.now().strftime("%Y-%m")
+
+
+
+date_freeze = datetime.strptime(config['freeze_time'], "%Y-%m-%d %H:%M:%S")
+
+print(config['freeze_time'])
+
+
+CURRENT_MONTH = datetime.now().month if config['freeze'] == 0 else date_freeze.month
+CURRENT_YEAR = datetime.now().year if config['freeze'] == 0 else date_freeze.year ###CRYR
+CURRENT_YEAR1 = datetime.now().year if config['freeze'] == 0 else date_freeze.year###CURRENT_YEAR
+YEAR_MONTH = datetime.now().strftime("%Y-%m") if config['freeze'] == 0 else date_freeze.strftime("%Y-%m")
 CONT_MONTH = 0
 
 YEAR_LABEL = 0

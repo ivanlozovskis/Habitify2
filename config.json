@@ -4,7 +4,9 @@
         "port": 3306,
         "user": "root",
         "password": "yourpassword",
-        "database_name": "Habitify"
+        "database_name": "Test",
+        "freeze_time": "2025-01-27 20:05:03",
+        "freeze": 1
     }
 
 }

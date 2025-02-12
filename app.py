@@ -8,6 +8,12 @@ from Windows import stats
 from functional import get_current_streaks
 import database as db
 import hmtodb
+from freezegun import freeze_time
+
+import json
+
+with open("config.json", "r") as file:
+    config = json.load(file)['database']
 
 
 
@@ -164,8 +170,7 @@ class HabitTrackerGUI:
 
 
     def deactivate_habit(self, habit):
-        self.habit_manager.habits = [h for h in self.habit_manager.habits if h.habit_id != habit.habit_id]
-        hmtodb.delete_habit(habit)
+        hmtodb.delete_habit(self.habit_manager,habit)
         self.display_habits()
 
 
@@ -258,7 +263,7 @@ class HabitTrackerGUI:
 
         habit_dropdown.bind("<<ComboboxSelected>>", on_habit_select)
 
-
+        @freeze_time(config['freeze_time'])
         def submit_missed_habit():
             habit_name = selected_habit.get()
             for h in habits:
@@ -306,24 +311,38 @@ class HabitTrackerGUI:
             habit_window = tk.Toplevel(self.root)
             habit_window.title("Add Habit")
 
-
             frequency_label = tk.Label(habit_window, text="Select Frequency:")
             frequency_label.pack(pady=5)
 
             selected_frequency = tk.StringVar()
-            selected_frequency.set(frequencies[0])
+            selected_frequency.set(frequencies[0])  # Default is "Daily"
 
             frequency_menu = tk.OptionMenu(habit_window, selected_frequency, *frequencies)
             frequency_menu.pack(pady=5)
 
+            # Create stopwatch checkbox but don't pack yet
             is_stopwatch_var = tk.BooleanVar(value=False)
             stopwatch_checkbox = tk.Checkbutton(habit_window, text="Enable Stopwatch", variable=is_stopwatch_var)
-            stopwatch_checkbox.pack(pady=5)
+
+            # Function to toggle visibility based on frequency
+            def toggle_stopwatch_checkbox(*args):
+                if selected_frequency.get() == "Daily":
+                    stopwatch_checkbox.pack(pady=5)  # Show if Daily
+                else:
+                    stopwatch_checkbox.pack_forget()  # Hide if Weekly
+
+            # Bind the function to frequency changes
+            selected_frequency.trace_add("write", toggle_stopwatch_checkbox)
+
+            # Initially show the checkbox if Daily
+            toggle_stopwatch_checkbox()
 
             confirm_button = tk.Button(habit_window, text="Confirm",
                                        command=lambda: self.save_habit(name, description, selected_frequency.get(),
                                                                        is_stopwatch_var.get(), habit_window))
             confirm_button.pack(pady=10)
+
+
 
     def save_habit(self, name, description, frequency, is_stopwatch,  window):
         hmtodb.create_habit(self.habit_manager, name, description, frequency, is_stopwatch)

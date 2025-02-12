@@ -3,18 +3,28 @@ from datetime import datetime
 import database as db
 import pandas as pd
 import numpy as np
+from freezegun import freeze_time
 import globals
 
 
 
 ### Function that calculates amount of active habits each day
 ### if a habit was active for less than a day it doesn't count
+import json
+
+# from test import missed
+
+with open("config.json", "r") as file:
+    config = json.load(file)['database']
+    date_obj = datetime.strptime(config['freeze_time'], "%Y-%m-%d %H:%M:%S")
+
+# @freeze_time(config['freeze_time'])
 def denom():
     df = db.get_created(db.get_connection())
     df['Created'] = pd.to_datetime(df['Created'])
     df['Deleted'] = pd.to_datetime(df['Deleted'])
     start_date = df['Created'].min().date()
-    end_date = datetime.now().date()
+    end_date = datetime.now().date() if config['freeze'] == 0 else date_obj.date()
     date_range = pd.date_range(start=start_date, end=end_date)
 
     result = pd.DataFrame({'Date': date_range})
@@ -55,8 +65,10 @@ def identify_streaks(df, interval=1):
 
     if interval !=7 :
         df['streak'] = df.groupby('Habit_id')['dayofyear'].diff().ne(interval).cumsum()
+
     else:
         df['streak'] = df.groupby('Habit_id')['weekofyear'].apply(lambda x: (x.diff().fillna(0) != 1).cumsum()).reset_index()['weekofyear']
+
     return df
 
 
@@ -110,6 +122,7 @@ def get_data():
 
 
 #### The continuous dates are needed due to next year having reset weekdays, day of the year and monthsl.
+# @freeze_time(config['freeze_time'])
 def continous_dates(df):
     df['date'] = df['dt'].dt.strftime('%Y-%m-%d')
     dates = pd.to_datetime(df['dt'])
@@ -124,21 +137,21 @@ def continous_dates(df):
     df['month'] = continuous_months
 
 
-    today = pd.Timestamp(date.today())
-    today = date.today()
+    today = pd.Timestamp(date.today()) if config['freeze'] == 0 else pd.Timestamp(date_obj)
+    today = date.today() if config['freeze'] == 0 else date_obj
     today = today.strftime("%Y-%m-%d")
 
-    yesterday = date.today() - pd.Timedelta(days=1)
+    yesterday = date.today() - pd.Timedelta(days=1) if config['freeze'] == 0 else date_obj - pd.Timedelta(days=1)
     yesterday = yesterday.strftime("%Y-%m-%d")
 
-    today1 = pd.Timestamp(date.today())
+    today1 = pd.Timestamp(date.today()) if config['freeze'] == 0 else pd.Timestamp(date_obj)
 
 
     thisweek = ((today1 - min_date).days // 7) + 1
     adjusted_dayofyear = (today1 - min_date).days + 1
     thisdayofyear = adjusted_dayofyear
     this_month = (today1.year - min_date.year) * 12 + (today1.month - min_date.month)
-    today_day = date.today().day
+    today_day = date.today().day if config['freeze'] == 0 else date_obj.day
 
     return df, thisweek, today, yesterday, min_date, thisdayofyear, this_month, today_day
 
@@ -160,6 +173,7 @@ def fill_with_unique_value(df):
     return df
 
 
+# @freeze_time(config['freeze_time'])
 def get_current_streaks():
     """Function that calculates everything.
     Streaks, Missed days, Data for different plots(ones that starts from
@@ -167,6 +181,7 @@ def get_current_streaks():
 
 
     df = get_data()
+    df.to_csv("what.csv")
     if df.empty:
         return None, None, None, None, None, None, None
 
@@ -221,10 +236,15 @@ def get_current_streaks():
 
 
     dailies_lastcheck['last'] = dailies_lastcheck['last'].dt.strftime("%Y-%m-%d")
-    dailies_lastcheck['diff'] = (pd.to_datetime(datetime.now().strftime("%Y-%m-%d")) - pd.to_datetime(dailies_lastcheck['last'])).dt.days
+    now = datetime.now().strftime("%Y-%m-%d") if config['freeze'] == 0 else date_obj.strftime("%Y-%m-%d")
+    dailies_lastcheck['diff'] = (pd.to_datetime(now) - pd.to_datetime(dailies_lastcheck['last'])).dt.days
     dailies_lastcheck['diff'] = dailies_lastcheck['diff'].apply(lambda x: x - 1 if x > 0 else x)
-    missed_days_or_weeks = pd.concat([weeklies_lastcheck[['Habit_id','diff']], dailies_lastcheck[["Habit_id", "diff"]]])
 
+    missed_days_or_weeks = pd.concat([weeklies_lastcheck[['Habit_id','diff']], dailies_lastcheck[["Habit_id", "diff"]]])
+    missed_days_or_weeks.dropna(subset='Habit_id', inplace=True)
+
+    missed_days_or_weeks['Name'] = missed_days_or_weeks['Habit_id'].apply(
+        lambda x: df_merged[df_merged['Habit_id'] == x]['Name'].unique()[0])
 
     ##both in weeks and days(except for weekly habits)
     longest_streaks = pd.DataFrame()

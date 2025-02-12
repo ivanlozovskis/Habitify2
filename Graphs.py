@@ -8,6 +8,7 @@ import database as db
 import functional
 import pandas as pd
 
+
 ##All plots are here
 
 
@@ -77,6 +78,7 @@ def year_activity_calendar(year, output_file=""):
     df['perc'] = df['count'] / df['Active_Habits']
     df['perc'] = (df['perc'] * 4).astype(int) + 1
 
+
     streaks, _, top, topw, perstats, data, tmps1 = functional.get_current_streaks()
     df = df[df['year'] == year]
 
@@ -91,6 +93,7 @@ def year_activity_calendar(year, output_file=""):
 
 
 
+
     colors = ["#808080", "#9be9a8", "#40c463", "#30a14e", "#216e39", "#FFD700"] #the "perfect day"(all habits were checked) will be colored gold
 
     cell_size = 8
@@ -99,6 +102,7 @@ def year_activity_calendar(year, output_file=""):
     y_label_padding = 5
 
     first_day_of_year = datetime(year, 1, 1).weekday()
+    empty_days = (first_day_of_year + 1) % 7 - 1
     empty_days = (first_day_of_year + 1) % 7 - 1
 
     weeks_in_year = (len(contribution_data) + empty_days + 6) // 7
@@ -125,11 +129,13 @@ def year_activity_calendar(year, output_file=""):
 
 
     day_of_year = 0
+
     for column in range(weeks_in_year):
         for row in range(7):
             if column == 0 and row < empty_days:
                 continue
             if day_of_year < len(contribution_data):
+
                 color = colors[contribution_data[day_of_year]]
 
                 x0 = border_padding + column * (cell_size + cell_padding)

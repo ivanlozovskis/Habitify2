@@ -113,7 +113,16 @@ def get_created(connection):
     return select(connection, "SELECT ID, Created, Deleted from Habit;")
 
 def get_habit_counts(connection):
-    return select(connection,"SELECT count(distinct habit_id) as count, dayofyear(dt) as doy, year(dt) as year, DATE_FORMAT(dt, '%Y-%m-%d') AS dt from Log group by dayofyear(dt), year(dt), DATE_FORMAT(dt, '%Y-%m-%d');")
+    return select(connection,"""SELECT 
+    COUNT(DISTINCT l.habit_id) AS count, 
+    DAYOFYEAR(l.dt) AS doy, 
+    YEAR(l.dt) AS year, 
+    DATE_FORMAT(l.dt, '%Y-%m-%d') AS dt
+    FROM Log l
+    JOIN Habit h ON l.habit_id = h.id
+    WHERE h.deleted IS NULL OR DATE(h.created) <> DATE(h.deleted)  
+    GROUP BY DAYOFYEAR(l.dt), YEAR(l.dt), DATE_FORMAT(l.dt, '%Y-%m-%d');
+""")
 
 
 ####needed to have the same habit_id in the class Habit as in Habit table when a habit is created

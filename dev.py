@@ -13,6 +13,16 @@ import os
 import sys
 from datetime import datetime
 import calendar
+from dateutil.relativedelta import relativedelta
+from freezegun import freeze_time
+
+import json
+
+from hmtodb import date_obj
+
+with open("config.json", "r") as file:
+    config = json.load(file)['database']
+    date_obj = datetime.strptime(config['freeze_time'], "%Y-%m-%d %H:%M:%S")
 
 
 
@@ -24,10 +34,10 @@ def get_app_data_dir(app_name="HabitifyApp"):
 
     return base_dir
 
-
+# @freeze_time(config['freeze_time'])
 def timepassed(habit):
     """Calculates whether the habit was done yesterday/last week"""
-    today = datetime.now().date()
+    today = datetime.now().date()  if config['freeze'] == 0 else date_obj.date()
     latestcheck = habit.latest_check.date()
     if habit.frequency == "Daily":
         if today == latestcheck:
@@ -75,13 +85,14 @@ def years(year):
     left = right = None
     connection = get_connection()
     df = db.get_log(connection)
-    unique_years = df['dt'].dt.year.unique()
+    unique_years = df.dropna(subset='dt')['dt'].dt.year.unique()
     if np.where(unique_years == year)[0] > 0:
         left = year - 1
     if np.where(unique_years == year)[0] < len(unique_years)-1:
         right = year + 1
     return left, right
 
+# @freeze_time(config['freeze_time'])
 def months(month):
     """this function calculates whether there are data in the previous and in the next month and also gives out the continous number of the month (starting from the first date in log)"""
     left = right = None
@@ -91,16 +102,40 @@ def months(month):
     data['date'] = data['dt'].dt.strftime("%Y-%m")
     data = data.drop_duplicates(subset='date')
     df_sorted = data.sort_values(by='date')['date'].values
+
+
     cont_months = {}
     for i, m in enumerate(df_sorted):
         cont_months[m] = i
+
+
+    target_month = datetime(globals.CURRENT_YEAR, globals.CURRENT_MONTH, 1).strftime("%Y-%m")
+    dates = sorted(datetime.strptime(k, "%Y-%m") for k in cont_months.keys())
+    start_date = dates[0]
+    end_date = datetime.now() if config['freeze'] == 0 else date_obj
+    target_date = datetime.strptime(target_month, "%Y-%m")
+    month_number = (target_date.year - start_date.year) * 12 + (target_date.month - start_date.month)
+
+    if target_date > end_date:
+        end_date = target_date
+
+    filled_dict = {}
+    current_date = start_date
+    while current_date <= end_date:
+        formatted_month = current_date.strftime("%Y-%m")
+        filled_dict[formatted_month] = (current_date.year - start_date.year) * 12 + (
+                    current_date.month - start_date.month)
+        current_date += relativedelta(months=1)
+
+
+    df_sorted = np.array([s for s in filled_dict.keys()])
     if np.where(df_sorted == month)[0] > 0:
-        left = df_sorted[np.where(df_sorted == month)[0]-1][0]
-    if np.where(df_sorted == month)[0] < len(df_sorted)-1:
-        right = df_sorted[np.where(df_sorted == month)[0]+1][0]
+        left = df_sorted[np.where(df_sorted == month)[0] - 1][0]
+    if np.where(df_sorted == month)[0] < len(df_sorted) - 1:
+        right = df_sorted[np.where(df_sorted == month)[0] + 1][0]
 
+    return left, right, month_number
 
-    return left, right, cont_months[datetime(globals.CURRENT_YEAR, globals.CURRENT_MONTH, 1).strftime("%Y-%m")]
 
 
 
@@ -147,7 +182,7 @@ def debug_popup(message):
 
 
 
-
+# @freeze_time(config['freeze_time'])
 def monthly_arrows(label, label1,output_dir, switch, data):
     globals.MBTN_LEFT.pack_forget()
     globals.MBTN_RIGHT.pack_forget()
