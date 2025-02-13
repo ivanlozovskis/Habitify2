@@ -11,7 +11,6 @@ with open("config.json", "r") as file:
 
 date_freeze = datetime.strptime(config['freeze_time'], "%Y-%m-%d %H:%M:%S")
 
-print(config['freeze_time'])
 
 
 CURRENT_MONTH = datetime.now().month if config['freeze'] == 0 else date_freeze.month

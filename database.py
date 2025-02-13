@@ -28,7 +28,7 @@ def create_database_if_not_exists():
             print(f"Database '{config['database_name']}' created successfully.")
         else:
             # print(f"Database '{config['database_name']}' already exists.")
-            print('all good')
+            pass
 
         cursor.close()
         conn.close()
@@ -71,7 +71,7 @@ def initialize_database():
     """)
 
 
-    # print("Tables checked/created successfully.")
+
 
 
 

@@ -63,7 +63,7 @@ def delete_habit(hm, habit, deleted=None):
 def done(hm, habit, timespent=None, time=None):
     if time == None:
 
-        time = str(date.today()) if config['freeze'] == 0 else str(date_obj)
+        time = str(datetime.now()) if config['freeze'] == 0 else str(date_obj)
 
     try:
 

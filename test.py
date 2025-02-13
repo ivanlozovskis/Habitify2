@@ -173,5 +173,5 @@ assert hmtodb.longest_streak(habit_manager.get_all_habits()[2]) == (5, 8)
 
 
 
-db.reset(connection, "Log")
-db.reset(connection, "Habit")
+# db.reset(connection, "Log")
+# db.reset(connection, "Habit")
