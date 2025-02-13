@@ -181,7 +181,6 @@ def get_current_streaks():
 
 
     df = get_data()
-    df.to_csv("what.csv")
     if df.empty:
         return None, None, None, None, None, None, None
 
