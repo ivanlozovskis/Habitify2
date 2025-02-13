@@ -1,9 +1,7 @@
-from freezegun import freeze_time
-
 import database as db
 import pandas as pd
 import functional
-from datetime import date, datetime
+from datetime import datetime
 import json
 
 with open("config.json", "r") as file:

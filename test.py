@@ -1,10 +1,6 @@
-from datetime import datetime
-
 import database as db
-import functional
 from classes import HabitManager
 import hmtodb
-import pandas as pd
 import functional
 
 

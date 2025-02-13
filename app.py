@@ -6,9 +6,8 @@ from datetime import timedelta
 from tkinter import messagebox, ttk
 from Windows import stats
 from functional import get_current_streaks
-import database as db
 import hmtodb
-from freezegun import freeze_time
+
 
 import json
 
@@ -163,6 +162,8 @@ class HabitTrackerGUI:
             self.stopwatch_vars[habit_id].set(formatted_time)
             self.root.after(1000, lambda: self.update_stopwatch(habit))
 
+
+
     def open_analysis_window(self):
         stats(self.root)
 
@@ -263,7 +264,7 @@ class HabitTrackerGUI:
 
         habit_dropdown.bind("<<ComboboxSelected>>", on_habit_select)
 
-        @freeze_time(config['freeze_time'])
+
         def submit_missed_habit():
             habit_name = selected_habit.get()
             for h in habits:

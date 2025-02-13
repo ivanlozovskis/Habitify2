@@ -3,7 +3,6 @@ from datetime import datetime
 import database as db
 import pandas as pd
 import numpy as np
-from freezegun import freeze_time
 import globals
 
 
